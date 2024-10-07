@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Banking App Example
+  description: API for customer transactions and setup
+  version: 1.0.0
+servers:
+  - url: 'localhost:8080/api'
+paths:
+  /customers/{id}:
+    get:
+      summary: Get customer details by ID
+      operationId: getCustomer
+      tags:
+        - Customers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Unique ID of the customer
+      responses:
+        '200':
+          description: Successfully retrieved customer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDto'
+        '404':
+          description: Customer not found
+
+  /customers/:
+    post:
+      summary: Create a new customer
+      operationId: createCustomer
+      tags:
+        - Customers
+      requestBody:
+        description: Customer details for the new customer
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerDto'
+      responses:
+        '200':
+          description: Successfully created customer
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: ID of the newly created customer
+        '400':
+          description: Invalid request
+
+  /accounts/{accId}:
+    get:
+      summary: Get account details for a customer by account ID
+      operationId: getAccountForCustomer
+      tags:
+        - Accounts
+      parameters:
+        - name: accId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Unique ID of the account
+      responses:
+        '200':
+          description: Successfully retrieved account details (implementation pending)
+
+  /accounts/:
+    post:
+      summary: Create a new account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId:
+                  type: integer
+                accountName:
+                  type: string
+                type:
+                  type: string
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accountId:
+                    type: integer
+        '400':
+          description: Invalid input data
+
+  /accounts/{accId}/transactions:
+    get:
+      summary: Get transactions for an account
+      operationId: getTransactions
+      tags:
+        - Transactions
+      parameters:
+        - name: accId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Unique ID of the account
+      responses:
+        '200':
+          description: Successfully retrieved transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponseDto'
+        '404':
+          description: Transactions not found for the account
+
+  /accounts/{accId}/transactions/:
+    post:
+      summary: Create a new transaction for an account
+      operationId: createTransaction
+      tags:
+        - Transactions
+      requestBody:
+        description: Details for the new transaction
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionDto'
+      responses:
+        '200':
+          description: Successfully created transaction
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: ID of the newly created transaction
+        '400':
+          description: Invalid request
+
+
+components:
+  schemas:
+    AccountDto:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          description: ID of the customer who owns the account
+        accountName:
+          type: string
+          description: Name of the account
+        type:
+          type: string
+          description: Type of the account (e.g., savings, checking)
+
+    CustomerDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of the customer
+        lastName:
+          type: string
+          description: Last name of the customer
+      required:
+        - firstName
+        - lastName
+
+    TransactionDto:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          description: ID of the account related to the transaction
+        details:
+          type: string
+          description: Description or details of the transaction
+        fromAccount:
+          type: string
+          description: Originating account for the transaction
+        amount:
+          type: number
+          format: double
+          description: Amount involved in the transaction
+
+    TransactionResponseDto:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          description: Current account balance
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionDto'
